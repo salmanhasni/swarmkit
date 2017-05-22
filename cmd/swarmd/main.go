@@ -187,6 +187,7 @@ var (
 				ListenControlAPI: unix,
 				ListenRemoteAPI:  addr,
 				JoinAddr:         managerAddr,
+				AdvertiseRemoteAPI: addr,
 				StateDir:         stateDir,
 				JoinToken:        joinToken,
 				ExternalCAs:      externalCAOpt.Value(),
