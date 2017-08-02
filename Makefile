@@ -7,6 +7,7 @@ DESTDIR=/usr/local
 # Used to populate version variable in main package.
 VERSION=$(shell git describe --match 'v[0-9]*' --dirty='.m' --always)
 
+
 PROJECT_ROOT=github.com/docker/swarmkit
 
 # Race detector is only supported on amd64.
@@ -22,7 +23,7 @@ BINARIES=$(addprefix bin/,$(COMMANDS))
 
 VNDR=$(shell which vndr || echo '')
 
-GO_LDFLAGS=-ldflags "-X `go list ./version`.Version=$(VERSION)"
+GO_LDFLAGS_STATIC=-ldflags "-X `go list ./version`.Version=$(VERSION) -extldflags -static"
 
 .PHONY: clean all AUTHORS fmt vet lint build binaries test integration setup generate protos checkprotos coverage ci check help install uninstall dep-validate
 .DEFAULT: default
@@ -97,11 +98,11 @@ ineffassign: ## run ineffassign
 
 build: ## build the go packages
 	@echo "🐳 $@"
-	@go build -i -tags "${DOCKER_BUILDTAGS}" -v ${GO_LDFLAGS} ${GO_GCFLAGS} ${PACKAGES}
+	@go build -i -tags "${DOCKER_BUILDTAGS}" -v ${GO_LDFLAGS_STATIC} ${GO_GCFLAGS} ${PACKAGES}
 
 test: ## run tests, except integration tests
 	@echo "🐳 $@"
-	@go test -parallel 8 ${RACE} -tags "${DOCKER_BUILDTAGS}" $(filter-out ${INTEGRATION_PACKAGE},${PACKAGES})
+	@go test -parallel 8 ${RACE} -tags "${DOCKER_BUILDTAGS}" ${GO_LDFLAGS_STATIC} $(filter-out ${INTEGRATION_PACKAGE},${PACKAGES})
 
 integration: ## run integration tests
 	@echo "🐳 $@"
@@ -114,7 +115,7 @@ bin/%: cmd/% FORCE
 	@test $$(go list) = "${PROJECT_ROOT}" || \
 		(echo "👹 Please correctly set up your Go build environment. This project must be located at <GOPATH>/src/${PROJECT_ROOT}" && false)
 	@echo "🐳 $@"
-	@go build -i -tags "${DOCKER_BUILDTAGS}" -o $@ ${GO_LDFLAGS}  ${GO_GCFLAGS} ./$<
+	@go build -i -tags "${DOCKER_BUILDTAGS}" -o $@ ${GO_LDFLAGS_STATIC}  ${GO_GCFLAGS} ./$<
 
 binaries: $(BINARIES) ## build binaries
 	@echo "🐳 $@"
