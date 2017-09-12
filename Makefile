@@ -32,6 +32,8 @@ else
 	GO_LDFLAGS=$(GO_LDFLAGS_NONSTATIC)
 endif
 
+$(info GO_LDFLAGS is $(GO_LDFLAGS))
+
 .PHONY: clean all AUTHORS fmt vet lint build binaries test integration setup generate protos checkprotos coverage ci check help install uninstall dep-validate
 .DEFAULT: default
 
